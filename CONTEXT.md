@@ -20,6 +20,10 @@ _Avoid_: host, server URL
 The optional Bearer key sent to the fastCRW server. Set by the `apiKey` option or `CRW_API_KEY`. Absent means no auth header.
 _Avoid_: secret, password
 
+**Release**:
+A version recorded as a dated heading in `CHANGELOG.md` and published to the Gitea npm registry. The latest changelog heading is the current release.
+_Avoid_: build, tag (a release is defined by the changelog, not a git tag)
+
 **Plugin options**:
 The values opencode passes to the plugin from `opencode.json`: `baseURL`, `apiKey`, `limit`, `lang`, `tbs`.
 _Avoid_: settings, config (config means `opencode.json` as a whole)
