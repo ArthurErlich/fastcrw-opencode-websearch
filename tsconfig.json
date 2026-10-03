@@ -8,7 +8,8 @@
     "outDir": "dist",
     "rootDir": "src",
     "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src"]
 }
