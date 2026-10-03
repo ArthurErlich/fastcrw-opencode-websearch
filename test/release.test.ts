@@ -1,6 +1,13 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { encodeName, isPublished, latestVersion, publishBody } from "../scripts/release.ts"
+import {
+  encodeName,
+  ensureLinked,
+  ensureTag,
+  isPublished,
+  latestVersion,
+  publishBody,
+} from "../scripts/release.ts"
 
 const changelog = (body: string) => `# Changelog\n\n${body}\n`
 
@@ -41,4 +48,84 @@ test("publishBody builds the npm publish payload with the tarball attached", () 
   assert.match(body.versions["1.0.0"].dist.integrity, /^sha512-/)
   assert.equal(body._attachments[file].data, tarball.toString("base64"))
   assert.equal(body._attachments[file].length, tarball.length)
+})
+
+// Fake Gitea API: each route answers with a status and optional JSON body; calls are recorded.
+function fakeApi(routes: Record<string, [number, unknown?]>) {
+  const calls: string[] = []
+  const fetchFn = (async (url: string, init?: RequestInit) => {
+    const key = `${init?.method ?? "GET"} ${url.replace("https://git.test/api/v1", "")}`
+    calls.push(key + (init?.body ? ` ${init.body}` : ""))
+    const [status, body] = routes[key] ?? [500, { message: `unexpected ${key}` }]
+    return new Response(JSON.stringify(body ?? {}), { status })
+  }) as typeof fetch
+  return {
+    calls,
+    api: { base: "https://git.test/api/v1", headers: { Authorization: "Bearer t" }, fetchFn },
+  }
+}
+
+test("ensureTag creates the tag when it does not exist", async () => {
+  const { calls, api } = fakeApi({
+    "GET /repos/haylan/r/tags/v1.0.0": [404],
+    "POST /repos/haylan/r/tags": [201],
+  })
+  assert.equal(await ensureTag(api, "haylan/r", "1.0.0", "abc123"), "created")
+  assert.deepEqual(JSON.parse(calls[1].replace("POST /repos/haylan/r/tags ", "")), {
+    tag_name: "v1.0.0",
+    target: "abc123",
+    message: "Release 1.0.0",
+  })
+})
+
+test("ensureTag leaves an existing tag alone", async () => {
+  const { calls, api } = fakeApi({ "GET /repos/haylan/r/tags/v1.0.0": [200, { name: "v1.0.0" }] })
+  assert.equal(await ensureTag(api, "haylan/r", "1.0.0", "abc123"), "exists")
+  assert.equal(calls.length, 1)
+})
+
+test("ensureTag throws on an unexpected API answer", async () => {
+  const { api } = fakeApi({ "GET /repos/haylan/r/tags/v1.0.0": [403, { message: "no" }] })
+  await assert.rejects(ensureTag(api, "haylan/r", "1.0.0", "abc"), /403/)
+})
+
+const pkgPath = "/packages/haylan/npm/%40haylan%2Fopencode-fastcrw"
+
+test("ensureLinked links an unlinked package to the repository", async () => {
+  const { calls, api } = fakeApi({
+    [`GET ${pkgPath}/1.0.0`]: [200, { repository: null }],
+    [`POST ${pkgPath}/-/link/r`]: [201],
+  })
+  assert.equal(
+    await ensureLinked(api, "haylan", "@haylan/opencode-fastcrw", "1.0.0", "r"),
+    "linked",
+  )
+  assert.equal(calls.length, 2)
+})
+
+test("ensureLinked skips a package that already has a repository", async () => {
+  const { calls, api } = fakeApi({
+    [`GET ${pkgPath}/1.0.0`]: [200, { repository: { full_name: "haylan/r" } }],
+  })
+  assert.equal(
+    await ensureLinked(api, "haylan", "@haylan/opencode-fastcrw", "1.0.0", "r"),
+    "already linked",
+  )
+  assert.equal(calls.length, 1)
+})
+
+test("ensureLinked throws when the package lookup or link fails", async () => {
+  const lookup = fakeApi({ [`GET ${pkgPath}/1.0.0`]: [404] })
+  await assert.rejects(
+    ensureLinked(lookup.api, "haylan", "@haylan/opencode-fastcrw", "1.0.0", "r"),
+    /404/,
+  )
+  const link = fakeApi({
+    [`GET ${pkgPath}/1.0.0`]: [200, {}],
+    [`POST ${pkgPath}/-/link/r`]: [403],
+  })
+  await assert.rejects(
+    ensureLinked(link.api, "haylan", "@haylan/opencode-fastcrw", "1.0.0", "r"),
+    /403/,
+  )
 })
