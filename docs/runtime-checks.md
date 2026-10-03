@@ -4,16 +4,16 @@ Results of the verification list in `docs/spec.md`. Run on 2026-10-03 against op
 
 ## Summary
 
-| #   | Check                                               | Result                                         |
-| --- | --------------------------------------------------- | ---------------------------------------------- |
-| 1   | Built-in providers removable or disableable         | Not run (plugin did not load)                  |
-| 2   | Throwing `setup` disables only this plugin          | Not run (plugin did not load)                  |
-| 3   | Config `websearch.provider` vs `editor.default.set` | Not run (plugin did not load)                  |
-| 4   | Install by name from the Gitea registry             | Not run (needs a published release)            |
-| 5   | Release job token has package-write rights          | Not run (needs a release run)                  |
-| 6   | `@opencode/plugin` install weight                   | Done                                           |
-| 7   | `npm run smoke` against the real fastCRW server     | Not run (server unreachable from this machine) |
-| 8   | Typings, `time` shape, 429 cooldown                 | Typings done; 429 not run                      |
+| #   | Check                                               | Result                              |
+| --- | --------------------------------------------------- | ----------------------------------- |
+| 1   | Built-in providers removable or disableable         | Not run (plugin did not load)       |
+| 2   | Throwing `setup` disables only this plugin          | Not run (plugin did not load)       |
+| 3   | Config `websearch.provider` vs `editor.default.set` | Not run (plugin did not load)       |
+| 4   | Install by name from the Gitea registry             | Not run (needs a published release) |
+| 5   | Release job token has package-write rights          | Not run (needs a release run)       |
+| 6   | `@opencode/plugin` install weight                   | Done                                |
+| 7   | `npm run smoke` against the real fastCRW server     | Done                                |
+| 8   | Typings, `time` shape, 429 cooldown                 | Typings done; 429 not run           |
 
 ## Findings
 
@@ -43,4 +43,8 @@ From `@opencode/schema` 2.0.22: a websearch result is `{ url: string, title?: st
 
 ### 7. Smoke test
 
-`crw.home:3000` did not respond from this machine. Run `CRW_API_URL=http://crw.home:3000 npm run smoke -- "opencode"` from a machine on your network and add the printed response shape (`data[]` or `data.results`) here.
+Run on 2026-10-03 against `http://crw.home` and `http://192.168.2.15:8013` (the same server; earlier attempts that day failed on DNS, a refused connection and an upstream 502 until the service came up). No token was needed (no `CRW_API_KEY` set). Findings:
+
+- The response envelope is `{ success, data }` and `data` is an object, so this server returns the self-hosted shape `data.results`, not a flat array. The plugin's dual-shape parser is needed, and the self-hosted shape is the one in use here.
+- Each result has `url`, `title`, `description`, `snippet`, `position`, `score` and `category`.
+- A search for "opencode" with `limit` 8 returned mapped results with `url`, `title`, `content` and `time: {}` as designed.
