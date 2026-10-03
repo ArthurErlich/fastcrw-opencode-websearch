@@ -35,16 +35,16 @@ Result: `url`, `title`, `description`, `snippet` (always-populated alias of `des
 
 Body `{ "success": false, "error": string, "error_code": string }`.
 
-| HTTP | error_code |
-|---|---|
-| 400 | `invalid_request` |
-| 401 | auth middleware message |
-| 422 | `target_unreachable` |
-| 429 | `rate_limited` |
-| 500 | `internal_error` |
-| 502 | `http_error` |
-| 503 | `search_disabled` / `search_degraded` |
-| 504 | `timeout` |
+| HTTP | error_code                            |
+| ---- | ------------------------------------- |
+| 400  | `invalid_request`                     |
+| 401  | auth middleware message               |
+| 422  | `target_unreachable`                  |
+| 429  | `rate_limited`                        |
+| 500  | `internal_error`                      |
+| 502  | `http_error`                          |
+| 503  | `search_disabled` / `search_degraded` |
+| 504  | `timeout`                             |
 
 Self-hosted search needs a SearXNG-style backend (`CRW_SEARCH__SEARCH_BACKEND_URL`); without one expect 503 `search_disabled`.
 

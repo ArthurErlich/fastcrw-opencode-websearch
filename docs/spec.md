@@ -8,12 +8,12 @@ An opencode v2 plugin that makes a self-hosted fastCRW server opencode's only we
 
 ## Identifiers
 
-| What | Value |
-|---|---|
-| npm package | `@haylan/opencode-fastcrw` |
-| Plugin id (`Plugin.define`) | `fastcrw.websearch` |
-| Provider id / display name | `fastcrw` / "fastCRW" |
-| Registry | `https://git.arthurerlich.de/api/packages/haylan/npm/` |
+| What                        | Value                                                  |
+| --------------------------- | ------------------------------------------------------ |
+| npm package                 | `@haylan/opencode-fastcrw`                             |
+| Plugin id (`Plugin.define`) | `fastcrw.websearch`                                    |
+| Provider id / display name  | `fastcrw` / "fastCRW"                                  |
+| Registry                    | `https://git.arthurerlich.de/api/packages/haylan/npm/` |
 
 ## Plugin behaviour
 
@@ -25,7 +25,11 @@ export default Plugin.define({
   async setup(ctx) {
     const config = resolveConfig(ctx.options, process.env) // throws on bad values
     await ctx.websearch.transform((editor) => {
-      editor.add({ id: "fastcrw", name: "fastCRW", execute: ({ query }, { signal }) => search(config, query, signal, fetch) })
+      editor.add({
+        id: "fastcrw",
+        name: "fastCRW",
+        execute: ({ query }, { signal }) => search(config, query, signal, fetch),
+      })
       editor.default.set("fastcrw")
     })
   },
@@ -38,20 +42,25 @@ fastCRW is the default and only provider; there is no fallback to built-ins.
 
 Precedence: plugin option > env var > default.
 
-| Option | Env var | Default | Rules |
-|---|---|---|---|
-| `baseURL` | `CRW_API_URL` | `http://localhost:3000` | trim, strip trailing `/`, must be `http(s)` URL |
-| `apiKey` | `CRW_API_KEY` | none | optional; Bearer header only when set; never logged or echoed |
-| `limit` | none | `8` | clamp to 1..20; invalid falls back to 8, never throws |
-| `lang` | none | unset | string; omitted from request when unset |
-| `tbs` | none | unset | one of `qdr:h`, `qdr:d`, `qdr:w`, `qdr:m`, `qdr:y`; omitted when unset |
+| Option    | Env var       | Default                 | Rules                                                                  |
+| --------- | ------------- | ----------------------- | ---------------------------------------------------------------------- |
+| `baseURL` | `CRW_API_URL` | `http://localhost:3000` | trim, strip trailing `/`, must be `http(s)` URL                        |
+| `apiKey`  | `CRW_API_KEY` | none                    | optional; Bearer header only when set; never logged or echoed          |
+| `limit`   | none          | `8`                     | clamp to 1..20; invalid falls back to 8, never throws                  |
+| `lang`    | none          | unset                   | string; omitted from request when unset                                |
+| `tbs`     | none          | unset                   | one of `qdr:h`, `qdr:d`, `qdr:w`, `qdr:m`, `qdr:y`; omitted when unset |
 
 Validation runs in `setup`. A malformed `baseURL`, bad `tbs` or non-string `lang` makes `setup` throw, with a message naming the option and the bad value. Example `opencode.json`:
 
 ```jsonc
 {
-  "plugins": [{ "package": "@haylan/opencode-fastcrw", "options": { "baseURL": "http://crw.home:3000", "limit": 8 } }],
-  "websearch": { "provider": "fastcrw" }
+  "plugins": [
+    {
+      "package": "@haylan/opencode-fastcrw",
+      "options": { "baseURL": "http://crw.home:3000", "limit": 8 },
+    },
+  ],
+  "websearch": { "provider": "fastcrw" },
 }
 ```
 
