@@ -19,4 +19,4 @@ jobs:
           SERVER_URL: ${{ gitea.server_url }}
           REPOSITORY: ${{ gitea.repository }}
           SHA: ${{ gitea.sha }}
-          TOKEN: ${{ secrets.PACKAGE_TOKEN || secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.PACKAGE_TOKEN }}

@@ -103,7 +103,7 @@ Run once on a real opencode v2 install; a failed check reopens the design as a n
 2. Does a throwing `setup` disable only this plugin, not opencode startup?
 3. Precedence of config `websearch.provider` vs `editor.default.set`.
 4. Does install-by-name from the Gitea registry work with a scoped `.npmrc` (`@haylan:registry=...`)? Fallback: tarball or local path.
-5. Does the release workflow's job token have package-write rights? Fallback: a `write:package` secret.
+5. Release token rights. Settled: the workflow uses a `PACKAGE_TOKEN` secret with `write:package` and `write:repository`; there is no job-token fallback.
 6. Does `npm install` of `@opencode/plugin` drag in `solid-js` and the OpenTUI peers? If heavy, move it to `peerDependencies` plus `devDependencies`.
 7. `npm run smoke` against the real fastCRW server (`CRW_API_URL`/`CRW_API_KEY`): record the real response shape (`data[]` vs `data.results`).
 8. Confirm the exact `@opencode/plugin` TypeScript types, the shape of `time`, and that a 429 status in an error message triggers opencode's provider cooldown.

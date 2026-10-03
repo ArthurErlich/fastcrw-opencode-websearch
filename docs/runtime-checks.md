@@ -10,7 +10,7 @@ Results of the verification list in `docs/spec.md`. Run on 2026-10-03 against op
 | 2   | Throwing `setup` disables only this plugin          | Done: yes, loudly                                             |
 | 3   | Config `websearch.provider` vs `editor.default.set` | Done: config wins                                             |
 | 4   | Install by name from the Gitea registry             | Done: works with a user-level scope mapping                   |
-| 5   | Release job token has package-write rights          | Not verified: the release used the `PACKAGE_TOKEN` secret     |
+| 5   | Release token has package-write rights              | Done: the release uses the `PACKAGE_TOKEN` secret             |
 | 6   | `@opencode/plugin` install weight                   | Done                                                          |
 | 7   | `npm run smoke` against the real fastCRW server     | Done                                                          |
 | 8   | Typings, `time` shape, 429 cooldown                 | Done: a 429 from our plugin triggers no cooldown              |
@@ -57,7 +57,7 @@ Release 0.0.1 is in the registry, linked to this repository, with tag `v0.0.1` (
 
 ### 5. Release token
 
-The release workflow succeeded, but the repository has a `PACKAGE_TOKEN` secret and the workflow prefers it over the job token, so the job-token fallback is untested. Tag creation and the package link worked with that token.
+The release workflow succeeded with the `PACKAGE_TOKEN` repository secret (rights `write:package` and `write:repository`): publishing, tag creation and the package link all worked. Decision: that secret stays, and the workflow uses it alone; the untested job-token fallback was removed.
 
 ### 6. `@opencode/plugin` install weight
 
@@ -76,7 +76,6 @@ From `@opencode/schema` 2.0.22: a result is `{ url: string, title?: string, cont
 - Decided against a root `index.js`: local testing uses a drop-in shim (see the README), and the package is installed by name through the registry.
 - Done: README install section and examples corrected (no `~` paths, directories only for local entries).
 - Optional: decide whether the generic user-facing error is acceptable, since our detailed messages are not surfaced.
-- Optional: remove the `PACKAGE_TOKEN` secret and run the release workflow once more to test the job-token fallback.
 
 ## Useful for later runs
 

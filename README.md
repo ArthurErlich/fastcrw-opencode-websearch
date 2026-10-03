@@ -98,4 +98,4 @@ Releases are published by the manually started `release` workflow on Gitea Actio
 
 Every step skips itself when done, so starting the workflow again completes a release that only partly succeeded.
 
-To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs a token with `write:package` and `write:repository` rights: the job token if it has them, otherwise a `PACKAGE_TOKEN` secret.
+To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs the `PACKAGE_TOKEN` repository secret, a token with `write:package` and `write:repository` rights.
