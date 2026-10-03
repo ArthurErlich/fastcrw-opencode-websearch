@@ -1,0 +1,33 @@
+{
+  "name": "@haylan/opencode-fastcrw",
+  "version": "0.0.0-dev",
+  "description": "opencode v2 plugin that makes a self-hosted fastCRW server the websearch provider",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write .",
+    "check": "prettier --check . && tsc --noEmit",
+    "test": "node --test",
+    "smoke": "node scripts/smoke.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.arthurerlich.de/haylan/fastcrw-opencode-websarch.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@opencode/plugin": "^2.0.22"
+  }
+}
