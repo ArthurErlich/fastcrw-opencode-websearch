@@ -73,8 +73,8 @@ From `@opencode/schema` 2.0.22: a result is `{ url: string, title?: string, cont
 
 ## Follow-ups this implies
 
-- **Local installs need a root `index.js`.** Add `index.js` (`export { default } from "./dist/index.js"`) to the package and `files`, so a config entry pointing at an unpacked package directory works as well as an npm-name install. The release script stages `package.json` and `dist/` only and would need to include it.
-- Update the README and spec examples: no `~` paths, and a directory (not a file) for local `plugins` entries.
+- Decided against a root `index.js`: local testing uses a drop-in shim (see the README), and the package is installed by name through the registry.
+- Done: README install section and examples corrected (no `~` paths, directories only for local entries).
 - Optional: decide whether the generic user-facing error is acceptable, since our detailed messages are not surfaced.
 - Optional: remove the `PACKAGE_TOKEN` secret and run the release workflow once more to test the job-token fallback.
 
