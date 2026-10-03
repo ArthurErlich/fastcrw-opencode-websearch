@@ -45,26 +45,27 @@ await ctx.websearch.transform((editor) => {
 {
   "plugins": [
     {
-      "package": "~/.config/opencode/plugins/fastcrw",
+      "package": "@haylan/opencode-fastcrw",
       "options": { "baseURL": "http://crw.home:3000", "limit": 8 },
     },
   ],
-  "websearch": { "provider": "fastcrw" },
 }
 ```
 
 - Key is plural `plugins` (v1: `plugin`). Entries are a string or `{ package, options }`.
-- `package` may be an npm name (`name`, `name@1.2.0`, `@scope/name`), `./local`, an absolute path or `file://`.
-- Auto-discovered: `.ts`/`.js` files and packages in `.opencode/plugins/` and `~/.config/opencode/plugins/`.
-- `websearch.provider` is a provider id or `"random"`; `"websearch": false` disables search. Built-in ids: exa, firecrawl, parallel, tavily, tinyfish.
-- CLI: `opencode plugin add|list|check|update|remove`.
+- `package` may be an npm name (`name`, `name@1.2.0`, `@scope/name`), `./relative` (resolved from the config file), an absolute path or `file://`. `~` is not expanded.
+- **Local paths must be directories**, resolved by file path (`<dir>/server`, then `<dir>/index`); `package.json` `exports` are ignored. A file entry is ignored with a warning, and a directory without a root `index`/`server` file loads silently nothing. npm names resolve through `exports`.
+- Auto-discovered: `.ts`/`.js` files (not `.mjs`) and directories in `.opencode/plugins/` and `~/.config/opencode/plugins/`. Drop-in files get no options.
+- `websearch.provider` is a provider id or `"random"`; `"websearch": false` disables search. Built-in ids: exa, firecrawl, parallel, tavily, tinyfish. A provider named here **wins** over a plugin's `editor.default.set`; with it unset, the plugin's default applies.
+- CLI: `opencode plugin add|list|check|update|remove` (`add` writes the global config).
+- Loading is lazy: after startup or reload the plugin list fills in after several seconds. Load errors show as `state.status: "failed"` in `GET /api/plugin` (private server: `opencode serve`, Basic auth user `opencode`).
 
 ## Packaging (npm)
 
 `"type": "module"`, `exports["."]` pointing at the entry, dependency on `@opencode/plugin`.
 
-## Unverified: check at runtime, do not assume
+## Still unverified
 
-- Exact TypeScript types for the editor, `time` and `execute` args (read `@opencode/plugin` typings after install).
-- Inner shape of `time`, and whether extra result fields are allowed.
-- Precedence between config `websearch.provider` and `editor.default.set(id)`.
+- Installing by name from the Gitea registry with a scoped `.npmrc`.
+
+Verified results: `docs/runtime-checks.md`.
