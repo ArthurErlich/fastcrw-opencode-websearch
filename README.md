@@ -82,4 +82,12 @@ npm run smoke -- "query"   # one real search against CRW_API_URL (manual)
 
 ### Releasing
 
-Releases are published by the manually started `release` workflow on Gitea Actions. It publishes the latest version heading in `CHANGELOG.md` (the repository keeps the dev version `0.0.0-dev` in `package.json`) and skips versions that already exist. To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs a `PACKAGE_TOKEN` secret with `write:package` rights unless the job token already has them.
+Releases are published by the manually started `release` workflow on Gitea Actions. It reads the latest version heading in `CHANGELOG.md` (the repository keeps the dev version `0.0.0-dev` in `package.json`) and then:
+
+1. publishes that version to the Gitea npm registry, unless it already exists;
+2. tags the workflow's commit `v<version>`, unless the tag already exists;
+3. links the package to this repository, unless it is already linked.
+
+Every step skips itself when done, so starting the workflow again completes a release that only partly succeeded.
+
+To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs a token with `write:package` and `write:repository` rights: the job token if it has them, otherwise a `PACKAGE_TOKEN` secret.

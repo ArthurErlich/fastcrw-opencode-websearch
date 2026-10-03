@@ -16,5 +16,7 @@ jobs:
       - run: npm run build
       - run: node scripts/release.ts
         env:
-          REGISTRY_URL: ${{ gitea.server_url }}/api/packages/${{ gitea.repository_owner }}/npm
+          SERVER_URL: ${{ gitea.server_url }}
+          REPOSITORY: ${{ gitea.repository }}
+          SHA: ${{ gitea.sha }}
           TOKEN: ${{ secrets.PACKAGE_TOKEN || secrets.GITHUB_TOKEN }}
