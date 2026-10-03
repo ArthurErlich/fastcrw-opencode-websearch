@@ -43,8 +43,13 @@ await ctx.websearch.transform((editor) => {
 
 ```jsonc
 {
-  "plugins": [{ "package": "~/.config/opencode/plugins/fastcrw", "options": { "baseURL": "http://crw.home:3000", "limit": 8 } }],
-  "websearch": { "provider": "fastcrw" }
+  "plugins": [
+    {
+      "package": "~/.config/opencode/plugins/fastcrw",
+      "options": { "baseURL": "http://crw.home:3000", "limit": 8 },
+    },
+  ],
+  "websearch": { "provider": "fastcrw" },
 }
 ```
 

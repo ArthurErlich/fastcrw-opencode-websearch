@@ -18,14 +18,14 @@ Resolves issue #3. Researched 2026-10-03 against `main` of github.com/us/crw (`f
 
 ## Env var names
 
-| Var | Used by | Meaning |
-|---|---|---|
-| `CRW_API_URL` | crw-mcp, crw CLI | Remote server base URL. Default `https://api.fastcrw.com`; `http://localhost:3000` for self-hosted. |
-| `CRW_API_KEY` | crw-mcp, crw CLI | Bearer token for the remote server. |
-| `CRW_LOCAL` | crw-mcp | Truthy forces embedded mode, ignoring `CRW_API_URL`. |
-| `CRW_AUTH__API_KEYS` | server | Accepted keys (server side). |
-| `CRW_SEARCH__*` | server | Search config (`enabled`, `search_backend_url`, `timeout_ms`, `default_limit`, `max_limit`). |
-| `CRW_SEARXNG_URL` | CLI | Legacy local search backend URL. |
+| Var                  | Used by          | Meaning                                                                                             |
+| -------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `CRW_API_URL`        | crw-mcp, crw CLI | Remote server base URL. Default `https://api.fastcrw.com`; `http://localhost:3000` for self-hosted. |
+| `CRW_API_KEY`        | crw-mcp, crw CLI | Bearer token for the remote server.                                                                 |
+| `CRW_LOCAL`          | crw-mcp          | Truthy forces embedded mode, ignoring `CRW_API_URL`.                                                |
+| `CRW_AUTH__API_KEYS` | server           | Accepted keys (server side).                                                                        |
+| `CRW_SEARCH__*`      | server           | Search config (`enabled`, `search_backend_url`, `timeout_ms`, `default_limit`, `max_limit`).        |
+| `CRW_SEARXNG_URL`    | CLI              | Legacy local search backend URL.                                                                    |
 
 Sources: docs.fastcrw.com (REST API section), crates/crw-core/src/config.rs, crw-mcp README.
 Plugin should use `CRW_API_URL` / `CRW_API_KEY` to match upstream naming.
@@ -34,16 +34,16 @@ Plugin should use `CRW_API_URL` / `CRW_API_KEY` to match upstream naming.
 
 Source: `SearchRequest` in crates/crw-core/src/types.rs (camelCase serde); blog/crw-search-api-release.md.
 
-| Field | Type | Notes |
-|---|---|---|
-| `query` | string, required | Max 2000 chars (handler validation). |
-| `limit` | int, optional | Default 5 (`default_limit`); clamped server-side to `1..=max_limit` (max 20). |
-| `lang` | string | SearXNG language, e.g. `en`, `de`, `auto`; validated as a language tag. |
-| `tbs` | enum | `qdr:h`, `qdr:d`, `qdr:w`, `qdr:m`, `qdr:y`. |
-| `sources` | array | `web`, `news`, `images`. Presence switches response to grouped form. |
-| `categories` | array, max 5 | `github`, `research`, `pdf`, or passthrough string. |
-| `scrapeOptions` | object | Scrapes each web result (timeout bounds 1..60000 ms). Adds `markdown` etc. to results. |
-| `answer`, `answerTopN`, `summarizeResults`, `maxCharsPerSource`, `llmApiKey`, `llmProvider`, `llmModel` | | LLM synthesis; need `scrapeOptions`. Not needed by this plugin. |
+| Field                                                                                                   | Type             | Notes                                                                                  |
+| ------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------- |
+| `query`                                                                                                 | string, required | Max 2000 chars (handler validation).                                                   |
+| `limit`                                                                                                 | int, optional    | Default 5 (`default_limit`); clamped server-side to `1..=max_limit` (max 20).          |
+| `lang`                                                                                                  | string           | SearXNG language, e.g. `en`, `de`, `auto`; validated as a language tag.                |
+| `tbs`                                                                                                   | enum             | `qdr:h`, `qdr:d`, `qdr:w`, `qdr:m`, `qdr:y`.                                           |
+| `sources`                                                                                               | array            | `web`, `news`, `images`. Presence switches response to grouped form.                   |
+| `categories`                                                                                            | array, max 5     | `github`, `research`, `pdf`, or passthrough string.                                    |
+| `scrapeOptions`                                                                                         | object           | Scrapes each web result (timeout bounds 1..60000 ms). Adds `markdown` etc. to results. |
+| `answer`, `answerTopN`, `summarizeResults`, `maxCharsPerSource`, `llmApiKey`, `llmProvider`, `llmModel` |                  | LLM synthesis; need `scrapeOptions`. Not needed by this plugin.                        |
 
 Minimal request is `{"query","limit"}`; `lang`/`tbs` are the only extras worth exposing.
 
@@ -56,9 +56,19 @@ Envelope `ApiResponse` (camelCase, absent fields omitted): `success`, `data`, `e
 Hosted example (flat, per docs):
 
 ```json
-{"success": true, "data": [
-  {"url": "https://...", "title": "...", "description": "...", "snippet": "...", "position": 1, "score": 9.5}
-]}
+{
+  "success": true,
+  "data": [
+    {
+      "url": "https://...",
+      "title": "...",
+      "description": "...",
+      "snippet": "...",
+      "position": 1,
+      "score": 9.5
+    }
+  ]
+}
 ```
 
 Self-hosted (CLI parser handles `{"success": true, "data": {"results": [ ... ]}}`).
@@ -71,16 +81,16 @@ Conflict note: the docs example and CLI show flat `data[]` for hosted; the struc
 
 JSON body `{"success": false, "error": "<message>", "error_code": "<code>"}` (crates/crw-server/src/error.rs).
 
-| HTTP | error_code | Cause |
-|---|---|---|
-| 400 | `invalid_request` | bad query/limit/lang |
-| 401 | (auth middleware message) | missing/invalid key |
-| 429 | `rate_limited` | rate limit |
-| 502 | `http_error` | search backend HTTP/JSON failure |
-| 504 | `timeout` | search timeout (default 15 s) |
-| 503 | `search_disabled` / `search_degraded` | search off or backend unhealthy |
-| 422 | `target_unreachable` | backend unreachable |
-| 500 | `internal_error` | other |
+| HTTP | error_code                            | Cause                            |
+| ---- | ------------------------------------- | -------------------------------- |
+| 400  | `invalid_request`                     | bad query/limit/lang             |
+| 401  | (auth middleware message)             | missing/invalid key              |
+| 429  | `rate_limited`                        | rate limit                       |
+| 502  | `http_error`                          | search backend HTTP/JSON failure |
+| 504  | `timeout`                             | search timeout (default 15 s)    |
+| 503  | `search_disabled` / `search_degraded` | search off or backend unhealthy  |
+| 422  | `target_unreachable`                  | backend unreachable              |
+| 500  | `internal_error`                      | other                            |
 
 Backend hostnames/credentials are never leaked in errors.
 
