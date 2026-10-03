@@ -6,13 +6,21 @@ The plugin registers a search provider with id `fastcrw` and makes it the defaul
 
 ## Install
 
-The package is published to the Gitea npm registry. Map the scope to it in your `.npmrc`:
+The package is published to the Gitea npm registry. Map the scope to it in your user-level `~/.npmrc`:
 
 ```
 @haylan:registry=https://git.arthurerlich.de/api/packages/haylan/npm/
 ```
 
-Then add the plugin to your `opencode.json`:
+It has to be the user-level file (or the equivalent `npm_config_@haylan:registry` environment variable): opencode installs plugins from its own cache folder and ignores a project-level `.npmrc`, and without the mapping it looks for the package on npmjs.com and fails with a 404.
+
+Then install it with opencode, which also adds it to your config:
+
+```bash
+opencode plugin add @haylan/opencode-fastcrw
+```
+
+A plugin that is only listed in `opencode.json` is not installed automatically. Add your options to the entry that `plugin add` created:
 
 ```jsonc
 {
@@ -25,7 +33,7 @@ Then add the plugin to your `opencode.json`:
 }
 ```
 
-Installing by name from the Gitea registry has not been verified end to end yet; see [docs/runtime-checks.md](docs/runtime-checks.md).
+Verified with 0.0.1 against opencode v2.0.22; see [docs/runtime-checks.md](docs/runtime-checks.md).
 
 ### Local build
 
@@ -90,4 +98,4 @@ Releases are published by the manually started `release` workflow on Gitea Actio
 
 Every step skips itself when done, so starting the workflow again completes a release that only partly succeeded.
 
-To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs a token with `write:package` and `write:repository` rights: the job token if it has them, otherwise a `PACKAGE_TOKEN` secret.
+To release: add a dated `## [x.y.z]` entry to `CHANGELOG.md`, merge it to `main`, then start the workflow. It needs the `PACKAGE_TOKEN` repository secret, a token with `write:package` and `write:repository` rights.

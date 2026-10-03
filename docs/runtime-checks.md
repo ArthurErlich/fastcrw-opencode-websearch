@@ -9,8 +9,8 @@ Results of the verification list in `docs/spec.md`. Run on 2026-10-03 against op
 | 1   | Built-in providers removable or disableable         | Done: not removable by a plugin, but never used as a fallback |
 | 2   | Throwing `setup` disables only this plugin          | Done: yes, loudly                                             |
 | 3   | Config `websearch.provider` vs `editor.default.set` | Done: config wins                                             |
-| 4   | Install by name from the Gitea registry             | Not run (needs a published release)                           |
-| 5   | Release job token has package-write rights          | Not run (needs a release run)                                 |
+| 4   | Install by name from the Gitea registry             | Done: works with a user-level scope mapping                   |
+| 5   | Release token has package-write rights              | Done: the release uses the `PACKAGE_TOKEN` secret             |
 | 6   | `@opencode/plugin` install weight                   | Done                                                          |
 | 7   | `npm run smoke` against the real fastCRW server     | Done                                                          |
 | 8   | Typings, `time` shape, 429 cooldown                 | Done: a 429 from our plugin triggers no cooldown              |
@@ -46,6 +46,19 @@ With `baseURL: "nope"`, only this plugin ended up in state `failed`, with our me
 
 Config `websearch.provider` wins over the plugin's `editor.default.set`: with the config set to `exa`, a query without a provider id went to Exa (and worked without a key, so the query left the machine). With the config unset or set to `fastcrw`, the plugin's provider was used. Consequence: do not set `websearch.provider` to anything else; setting it to `fastcrw` is harmless and explicit.
 
+### 4. Install by name from the Gitea registry
+
+Release 0.0.1 is in the registry, linked to this repository, with tag `v0.0.1` (workflow run succeeded). Verified in an isolated profile:
+
+- `npm install @haylan/opencode-fastcrw` with the scoped `.npmrc` mapping works anonymously, and the installed package imports as plugin id `fastcrw.websearch`.
+- `opencode plugin add @haylan/opencode-fastcrw` with the mapping set through `npm_config_@haylan:registry` installs it and adds `"@haylan/opencode-fastcrw"` to the config. Without the mapping it queries registry.npmjs.org and fails with a 404.
+- opencode ignores a project-level `.npmrc` (it installs from its own cache folder), so the mapping must be in the user-level `~/.npmrc` or the environment.
+- A `plugins` entry by name is **not** installed automatically on startup; only `plugin add` installs. After adding options to the entry and starting the server, a search without a provider id went to `fastcrw` and returned 3 results (`limit` 3) from the real server `http://crw.home`.
+
+### 5. Release token
+
+The release workflow succeeded with the `PACKAGE_TOKEN` repository secret (rights `write:package` and `write:repository`): publishing, tag creation and the package link all worked. Decision: that secret stays, and the workflow uses it alone; the untested job-token fallback was removed.
+
 ### 6. `@opencode/plugin` install weight
 
 `npm install` of `@opencode/plugin@2.0.22` adds about 100 MB of transitive dependencies (mainly `effect`, OpenTelemetry, `@redis`). Its peers `solid-js`, `@opentui/core`, `@opentui/solid` and `@opencode/theme` are optional and not installed. Decision for the first release: keep it in `dependencies` as the docs say; revisit if install size matters.
@@ -60,10 +73,9 @@ From `@opencode/schema` 2.0.22: a result is `{ url: string, title?: string, cont
 
 ## Follow-ups this implies
 
-- **Local installs need a root `index.js`.** Add `index.js` (`export { default } from "./dist/index.js"`) to the package and `files`, so a config entry pointing at an unpacked package directory works as well as an npm-name install. The release script stages `package.json` and `dist/` only and would need to include it.
-- Update the README and spec examples: no `~` paths, and a directory (not a file) for local `plugins` entries.
+- Decided against a root `index.js`: local testing uses a drop-in shim (see the README), and the package is installed by name through the registry.
+- Done: README install section and examples corrected (no `~` paths, directories only for local entries).
 - Optional: decide whether the generic user-facing error is acceptable, since our detailed messages are not surfaced.
-- Still to verify after the first release: check 4 (install by name with a scoped `.npmrc`) and check 5 (job token package-write rights).
 
 ## Useful for later runs
 
