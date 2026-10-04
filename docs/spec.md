@@ -1,6 +1,6 @@
 # Spec: fastCRW websearch plugin for opencode v2
 
-Compiled from the closed tickets on the map ([Wayfinder map: fastCRW websearch plugin for opencode v2](https://git.arthurerlich.de/haylan/fastcrw-opencode-websarch/issues/1)). Detail lives in each ticket and in `docs/research/`. Vocabulary is defined in `CONTEXT.md`. Reference skills: `.claude/skills/opencode-v2-plugin`, `.claude/skills/fastcrw-search-api`.
+Compiled from the closed tickets on the map ([Wayfinder map: fastCRW websearch plugin for opencode v2](https://git.arthurerlich.de/haylan/fastcrw-opencode-websearch/issues/1)). Detail lives in each ticket and in `docs/research/`. Vocabulary is defined in `CONTEXT.md`. Reference skills: `.claude/skills/opencode-v2-plugin`, `.claude/skills/fastcrw-search-api`.
 
 ## Goal
 
