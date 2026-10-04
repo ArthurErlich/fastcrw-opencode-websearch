@@ -47,7 +47,7 @@ npm run build
 opencode loads local plugins as directories, resolved by file path (`<dir>/server`, then `<dir>/index`), and ignores `package.json` `exports`, so this package cannot be pointed at directly. Use a small shim instead. Create `~/.config/opencode/plugins/fastcrw.js` (a `.js` or `.ts` file; `.mjs` is ignored) with:
 
 ```js
-export { default } from "file:///ABSOLUTE/PATH/TO/fastcrw-opencode-websarch/dist/index.js"
+export { default } from "file:///ABSOLUTE/PATH/TO/fastcrw-opencode-websearch/dist/index.js"
 ```
 
 A drop-in file cannot receive plugin options, so configure the plugin with the environment variables below (`CRW_API_URL`, `CRW_API_KEY`). To use options instead, put the same line in an `index.js` inside a directory and reference that directory as `"package": "./that-dir"` (a relative path is resolved from the config file; `~` is not expanded).
