@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://git.arthurerlich.de/haylan/fastcrw-opencode-websarch.git"
+    "url": "https://git.arthurerlich.de/haylan/fastcrw-opencode-websearch.git"
   },
   "license": "Apache-2.0",
   "dependencies": {
